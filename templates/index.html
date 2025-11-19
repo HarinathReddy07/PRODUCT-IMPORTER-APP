@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Importer - Acme Inc.</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1>Product Importer</h1>
+                    <p class="tagline">Efficient product management system for large-scale CSV imports</p>
+                </div>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-section="dashboard">Dashboard</button>
+                <button class="nav-btn" data-section="products">Products</button>
+                <button class="nav-btn" data-section="webhooks">Webhooks</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section active">
+                <!-- Welcome Banner -->
+                <div class="welcome-banner">
+                    <div class="banner-content">
+                        <h2>Welcome to Product Importer</h2>
+                        <p>Advanced product management system for importing and managing large-scale product catalogs with real-time progress tracking</p>
+                    </div>
+                    <div class="banner-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon total">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                                <line x1="9" y1="3" x2="9" y2="21"></line>
+                                <line x1="3" y1="9" x2="21" y2="9"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-total">0</h3>
+                            <p>Total Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-active">0</h3>
+                            <p>Active Products</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon inactive">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-inactive">0</h3>
+                            <p>Inactive Products</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compact Upload Section -->
+                <div class="upload-section-compact">
+                    <h3>Upload CSV File</h3>
+                    <div class="upload-box-compact" id="upload-box">
+                        <input type="file" id="file-input" accept=".csv" style="display: none;">
+                        <div class="upload-area-compact" id="upload-area">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <div class="upload-text">
+                                <p><strong>Click to upload</strong> or drag and drop</p>
+                                <p class="upload-hint">CSV file (max 500MB, up to 500,000 products)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="upload-progress" class="progress-container-compact" style="display: none;">
+                        <div class="progress-header-compact">
+                            <span id="progress-status">Initializing...</span>
+                            <span id="progress-percentage">0%</span>
+                        </div>
+                        <div class="progress-bar-container-compact">
+                            <div class="progress-bar-compact" id="progress-bar"></div>
+                        </div>
+                        <div class="progress-message-compact" id="progress-message">Waiting to start...</div>
+                        <div id="upload-results" class="upload-results-compact" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Products Table on Dashboard -->
+                <div class="dashboard-products">
+                    <div class="section-header">
+                        <h3>Recent Products</h3>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary btn-small" id="create-product-btn-dashboard">Create Product</button>
+                            <button class="btn btn-danger btn-small" id="bulk-delete-btn-dashboard" disabled>Delete Selected</button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filters-compact">
+                        <input type="text" id="filter-sku-dashboard" placeholder="SKU" class="filter-input-compact">
+                        <input type="text" id="filter-name-dashboard" placeholder="Name" class="filter-input-compact">
+                        <select id="filter-active-dashboard" class="filter-input-compact">
+                            <option value="">All Status</option>
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                        <button class="btn btn-secondary btn-small" id="apply-filters-dashboard">Filter</button>
+                        <button class="btn btn-secondary btn-small" id="clear-filters-dashboard">Clear</button>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="table-container">
+                        <table id="products-table-dashboard">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="select-all-checkbox-dashboard" title="Select All"></th>
+                                    <th>ID</th>
+                                    <th>SKU</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="products-tbody-dashboard">
+                                <tr>
+                                    <td colspan="7" class="loading">Loading products...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination" id="pagination-dashboard"></div>
+                </div>
+            </section>
+
+            <!-- Products Section (Full Page) -->
+            <section id="products-section" class="section">
+                <div class="section-header">
+                    <h2>Product Management</h2>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="create-product-btn">Create Product</button>
+                        <button class="btn btn-danger" id="bulk-delete-btn" disabled>Delete Selected Products</button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters">
+                    <input type="text" id="filter-sku" placeholder="Filter by SKU" class="filter-input">
+                    <input type="text" id="filter-name" placeholder="Filter by Name" class="filter-input">
+                    <input type="text" id="filter-description" placeholder="Filter by Description" class="filter-input">
+                    <select id="filter-active" class="filter-input">
+                        <option value="">All Status</option>
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+                    <button class="btn btn-secondary" id="apply-filters">Apply Filters</button>
+                    <button class="btn btn-secondary" id="clear-filters">Clear</button>
+                </div>
+
+                <!-- Products Table -->
+                <div class="table-container">
+                    <table id="products-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-checkbox" title="Select All"></th>
+                                <th>ID</th>
+                                <th>SKU</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody">
+                            <tr>
+                                <td colspan="7" class="loading">Loading products...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination"></div>
+            </section>
+
+            <!-- Webhooks Section -->
+            <section id="webhooks-section" class="section">
+                <div class="section-header">
+                    <h2>Webhook Management</h2>
+                    <button class="btn btn-primary" id="create-webhook-btn">Create Webhook</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="webhooks-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>URL</th>
+                                <th>Event Type</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="webhooks-tbody">
+                            <tr>
+                                <td colspan="5" class="loading">Loading webhooks...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="product-modal-title">Create Product</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="product-form">
+                    <input type="hidden" id="product-id">
+                    <div class="form-group">
+                        <label for="product-sku">SKU *</label>
+                        <input type="text" id="product-sku" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-name">Name *</label>
+                        <input type="text" id="product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-description">Description</label>
+                        <textarea id="product-description" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-active">
+                            <input type="checkbox" id="product-active" checked> Active
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-product">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webhook Modal -->
+    <div id="webhook-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="webhook-modal-title">Create Webhook</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="webhook-form">
+                    <input type="hidden" id="webhook-id">
+                    <div class="form-group">
+                        <label for="webhook-url">URL *</label>
+                        <input type="url" id="webhook-url" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="webhook-event-type">Event Type *</label>
+                        <select id="webhook-event-type" required>
+                            <option value="product.created">product.created</option>
+                            <option value="product.updated">product.updated</option>
+                            <option value="product.deleted">product.deleted</option>
+                            <option value="product.bulk_import">product.bulk_import</option>
+                            <option value="product.bulk_delete">product.bulk_delete</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webhook-secret">Secret (Optional)</label>
+                        <input type="text" id="webhook-secret">
+                    </div>
+                    <div class="form-group">
+                        <label for="webhook-enabled">
+                            <input type="checkbox" id="webhook-enabled" checked> Enabled
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary" id="cancel-webhook">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-ok">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
