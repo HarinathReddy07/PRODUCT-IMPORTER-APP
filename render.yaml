@@ -18,6 +18,8 @@ services:
         value: 0.0.0.0
       - key: FASTAPI_PORT
         value: 8000
+      - key: PYTHON_VERSION
+        value: 3.11.6
 
   - type: worker
     name: product-importer-worker

@@ -17,4 +17,3 @@ pydantic-settings==2.1.0
 
 # Additional utilities
 python-multipart==0.0.6
-
